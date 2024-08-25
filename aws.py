@@ -1,5 +1,11 @@
 import os
 import psycopg2
+
+conn = None
+cur = None
+
+db = dict()
+
 try:
     conn = psycopg2.connect(
         host=os.getenv('DB_END'),
@@ -9,20 +15,18 @@ try:
         port=5432
     )
     cur = conn.cursor()
-except Exception as e:
-    print("Database connection failed due to {}". format(e))
-
-db = dict()
-
-def create_table():
     cur.execute("""
-        CREATE TABLE IF NOT EXISTS receiver_table (
-            username VARCHAR(255) PRIMARY KEY,
-            chat_id BIGINT UNIQUE NOT NULL,
-            PRIMARY KEY (chat_id)
-        )
-    """)
+            CREATE TABLE IF NOT EXISTS receiver_table (
+                username VARCHAR(255) PRIMARY KEY,
+                chat_id BIGINT UNIQUE NOT NULL,
+                PRIMARY KEY (chat_id)
+            )
+        """)
     conn.commit()
+
+except Exception as e:
+    print("Database connection failed due to {}".format(e))
+
 
 def save_to_database(chat_id, username):
     db[username.lower()] = chat_id

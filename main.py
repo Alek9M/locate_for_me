@@ -15,7 +15,7 @@ from telegram.ext import (
     ApplicationBuilder
 )
 from geopandas.tools import geocode
-from aws import save_to_database, check_in_database, create_table
+from aws import save_to_database, check_in_database
 import geopandas as gpd
 from dotenv import load_dotenv
 

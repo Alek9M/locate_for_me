@@ -139,14 +139,18 @@ async def send_live_location(location, update, context: CallbackContext):
     )
 
     if not point_in_poly.empty:
-        country = point_in_poly.iloc[0]['NAME']
-        recipient_chat_id = context.user_data.get('chat_id')
-        if recipient_chat_id:
-            await context.bot.send_message(chat_id=recipient_chat_id,
-                                           text=f"@{update.message.chat.username} is in {country}.")
-            context.user_data['chat_id'] = None
-            await context.bot.send_message(chat_id=update.message.chat_id,
-                                           text=f"Your country ({country}) was shared")
+        try:
+            country = point_in_poly.iloc[0]['NAME']
+            recipient_chat_id = context.user_data.get('chat_id')
+            if recipient_chat_id:
+                await context.bot.send_message(chat_id=recipient_chat_id,
+                                               text=f"@{update.message.chat.username} is in {country}.")
+                context.user_data['chat_id'] = None
+                await context.bot.send_message(chat_id=update.message.chat_id,
+                                               text=f"Your country ({country}) was shared")
+        except Exception as e:
+            LOGGER.error(e)
+
     else:
         await context.bot.send_message(chat_id=update.message.chat_id, text=get_text('unknown_location'))
 

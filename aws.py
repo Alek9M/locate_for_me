@@ -16,9 +16,8 @@ class AWS:
             self.cur.execute("""
                     CREATE TABLE IF NOT EXISTS receiver_table (
                         username VARCHAR(255) PRIMARY KEY,
-                        chat_id BIGINT UNIQUE NOT NULL,
-                        PRIMARY KEY (chat_id)
-                    )
+                        chat_id BIGINT UNIQUE NOT NULL
+                    );
                 """)
             self.conn.commit()
 
@@ -27,14 +26,14 @@ class AWS:
 
     def save_to_database(self, chat_id, username):
         self.db[username.lower()] = chat_id
-        self.cur.execute("INSERT INTO receiver_table (username, chat_id) VALUES (%s, %s)", (username.lower(), chat_id))
+        self.cur.execute("INSERT INTO receiver_table (username, chat_id) VALUES (%s, %s);", (username.lower(), chat_id))
         self.conn.commit()
 
     def check_in_database(self, username: str):
         usr = username.lower()
         if usr in self.db:
             return self.db[usr]
-        self.cur.execute("SELECT chat_id FROM receiver_table WHERE username=%s", (usr,))
+        self.cur.execute("SELECT chat_id FROM receiver_table WHERE username=%s;", (usr,))
         rows = self.cur.fetchall()
         if len(rows) == 1:
             return rows[0]

@@ -1,8 +1,6 @@
 import os
 import psycopg2
 
-from main import LOGGER
-
 
 class AWS:
     def __init__(self):
@@ -39,7 +37,7 @@ class AWS:
         self.cur.execute("SELECT chat_id FROM receiver_table WHERE username=%s;", (usr,))
         rows = self.cur.fetchall()
         if len(rows) == 1:
-            LOGGER.info(rows)
+            print(rows)
             return rows[0]
 
     def close(self):

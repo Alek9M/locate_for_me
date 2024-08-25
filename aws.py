@@ -1,6 +1,9 @@
 import os
 import psycopg2
 
+from main import LOGGER
+
+
 class AWS:
     def __init__(self):
         self.db = dict()
@@ -16,7 +19,7 @@ class AWS:
             self.cur.execute("""
                     CREATE TABLE IF NOT EXISTS receiver_table (
                         username VARCHAR(255) PRIMARY KEY,
-                        chat_id BIGINT UNIQUE NOT NULL
+                        chat_id INT UNIQUE NOT NULL
                     );
                 """)
             self.conn.commit()
@@ -36,6 +39,7 @@ class AWS:
         self.cur.execute("SELECT chat_id FROM receiver_table WHERE username=%s;", (usr,))
         rows = self.cur.fetchall()
         if len(rows) == 1:
+            LOGGER.info(rows)
             return rows[0]
 
     def close(self):

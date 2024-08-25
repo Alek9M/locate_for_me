@@ -116,11 +116,13 @@ async def process_location(update: Update, context: CallbackContext):
 
 async def send_live_location(location, update, context: CallbackContext):
     lon, lat = location.longitude, location.latitude
+    await context.bot.send_message(chat_id=update.message.chat_id,
+                                   text=f"Locating...")
     gdf = gpd.GeoDataFrame(geometry=[Point(lon, lat)], crs='EPSG:4326')
     gdf = gdf.to_crs(epsg=4326)  # Make sure CRS is in WGS84
     loop = asyncio.get_event_loop()
     # Run the I/O-bound operation in an executor to avoid blocking the event loop
-    world = await loop.run_in_executor(None, gpd.read_file, "ne_110m_admin_0_countries/ne_110m_admin_0_countries.shp")
+    world = await loop.run_in_executor(None, gpd.read_file, f"{os.getenv('MAP_PATH')}/ne_110m_admin_0_countries.shp")
 
     # Run the spatial join in the executor as well since it can be CPU-intensive
     point_in_poly = await loop.run_in_executor(

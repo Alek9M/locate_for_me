@@ -3,3 +3,4 @@ python-dotenv
 boto3
 shapely
 geopandas
+psycopg2-binary

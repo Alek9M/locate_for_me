@@ -15,9 +15,10 @@ from telegram.ext import (
     ApplicationBuilder
 )
 from geopandas.tools import geocode
-from aws import save_to_database, check_in_database
+from aws import save_to_database, check_in_database, create_table
 import geopandas as gpd
 from dotenv import load_dotenv
+
 load_dotenv('.env')
 
 logging.basicConfig(
@@ -42,7 +43,7 @@ ENG = {
     'no_receiver': 'Please enter username again or ask user to reenter our receivers list.',
     'unknown_location': "Country not identified.",
     'registered': "You will now be able to receive countries!",
-    'language_set':  'Your language settings are saved'
+    'language_set': 'Your language settings are saved'
 }
 
 
@@ -55,6 +56,7 @@ async def start(update: Update, context: CallbackContext):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text('What you wanna do?', reply_markup=reply_markup)
+
 
 async def select_language(update: Update, context: CallbackContext):
     keyboard = [
@@ -78,6 +80,7 @@ async def set_language(update: Update, context: CallbackContext):
                                    text=get_text('language_set', context))
     await start_sharing(update, context)
 
+
 def get_text(key: str, context: CallbackContext):
     language = context.user_data.get('language')
     if language == RUS:
@@ -88,10 +91,12 @@ def get_text(key: str, context: CallbackContext):
 async def start_receiving(update: Update, context: CallbackContext):
     await _start_receiving(context, update.message.chat.id, update.message.chat.username)
 
+
 async def _start_receiving(context: CallbackContext, chat_id: int, username: str):
     save_to_database(chat_id, username.lower())
     await context.bot.send_message(chat_id=chat_id,
                                    text=get_text('registered', context))
+
 
 async def button(update: Update, context: CallbackContext):
     query = update.callback_query
@@ -110,9 +115,10 @@ async def process_location(update: Update, context: CallbackContext):
     user_location = update.message.location
     if user_location is None or user_location.live_period is None:
         await context.bot.send_message(chat_id=update.effective_chat.id,
-                                 text=get_text('please_share_again', context), parse_mode='MarkdownV2')
+                                       text=get_text('please_share_again', context), parse_mode='MarkdownV2')
     else:
         await send_live_location(user_location, update, context)
+
 
 async def send_live_location(location, update, context: CallbackContext):
     lon, lat = location.longitude, location.latitude
@@ -149,22 +155,10 @@ async def contact_exchange(update: Update, context: CallbackContext):
     if chat_id:
         context.user_data['chat_id'] = chat_id
         await context.bot.send_message(chat_id=update.effective_chat.id,
-                                 text=get_text('please_share', context), parse_mode='MarkdownV2')
+                                       text=get_text('please_share', context), parse_mode='MarkdownV2')
     else:
         await context.bot.send_message(chat_id=update.effective_chat.id,
-                                 text=get_text('no_receiver', context))
-
-
-# async def location_share(update: Update, context: CallbackContext):
-#     location_message = update.edited_message
-#     if location_message:
-#         location = location_message.location
-#         if location.live_period:
-#             point = geocode({"type": "Point", "coordinates": [location.longitude, location.latitude]},
-#                             provider='nominatim', user_agent='myGeocoder')
-#             await context.bot.send_message(chat_id=context.user_data['chat_id'],
-#                                      text=f'The country is {point["ADDRESS"]["country"]}')
-#             await context.bot.send_message(chat_id=update.effective_chat.id, text='Country sent.')
+                                       text=get_text('no_receiver', context))
 
 
 async def start_sharing(update: Update, context: CallbackContext):
@@ -172,12 +166,13 @@ async def start_sharing(update: Update, context: CallbackContext):
                                    text=get_text('share_with_whom', context))
     return contact_exchange
 
+
 def main():
+    create_table()
     app = ApplicationBuilder().token(os.getenv('TELEGRAM')).build()
     app.add_handler(CommandHandler('start', start_sharing))
     app.add_handler(CommandHandler('register', start_receiving))
     app.add_handler(CommandHandler('language', select_language))
-    # app.add_handler(CallbackQueryHandler(button))
     app.add_handler(CallbackQueryHandler(set_language))
     app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), contact_exchange))
     app.add_handler(MessageHandler(filters.LOCATION, process_location))

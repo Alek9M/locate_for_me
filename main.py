@@ -168,7 +168,6 @@ async def start_sharing(update: Update, context: CallbackContext):
 
 
 def main():
-    create_table()
     app = ApplicationBuilder().token(os.getenv('TELEGRAM')).build()
     app.add_handler(CommandHandler('start', start_sharing))
     app.add_handler(CommandHandler('register', start_receiving))

@@ -3,7 +3,7 @@ import boto3
 db = dict()
 
 def save_to_database(chat_id, username):
-    db[username] = chat_id
+    db[username.lower()] = chat_id
     # dynamodb = boto3.resource('dynamodb',
     #                           region_name='us-west-2',
     #                           aws_access_key_id="YOUR ACCESS KEY",
@@ -17,9 +17,10 @@ def save_to_database(chat_id, username):
     #     }
     # )
 
-def check_in_database(username):
-    if username in db:
-        return db[username]
+def check_in_database(username: str):
+    usr = username.lower()
+    if usr in db:
+        return db[usr]
     # dynamodb = boto3.resource('dynamodb',
     #                           region_name='us-west-2',
     #                           aws_access_key_id="YOUR ACCESS KEY",

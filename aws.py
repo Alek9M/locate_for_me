@@ -36,9 +36,8 @@ class AWS:
             return self.db[usr]
         self.cur.execute("SELECT chat_id FROM receiver_table WHERE username=%s;", (usr,))
         rows = self.cur.fetchall()
-        if len(rows) == 1:
-            print(rows)
-            return rows[0]
+        if len(rows) == 1 and rows[0][0] is not None:
+            return rows[0][0]
 
     def close(self):
         self.cur.close()

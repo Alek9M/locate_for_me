@@ -1,14 +1,16 @@
 import os
 import psycopg2
-
-conn = psycopg2.connect(
-    host=os.getenv('DB_END'),
-    database=os.getenv('DB_INSTANCE'),
-    user=os.getenv('DB_USERNAME'),
-    password=os.getenv('DB_PASS'),
-    port=5432
-)
-cur = conn.cursor()
+try:
+    conn = psycopg2.connect(
+        host=os.getenv('DB_END'),
+        database=os.getenv('DB_INSTANCE'),
+        user=os.getenv('DB_USERNAME'),
+        password=os.getenv('DB_PASS'),
+        port=5432
+    )
+    cur = conn.cursor()
+except Exception as e:
+    print("Database connection failed due to {}". format(e))
 
 db = dict()
 

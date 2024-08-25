@@ -15,11 +15,13 @@ from telegram.ext import (
     ApplicationBuilder
 )
 from geopandas.tools import geocode
-from aws import save_to_database, check_in_database
+from aws import AWS
 import geopandas as gpd
 from dotenv import load_dotenv
 
 load_dotenv('.env')
+
+aws = AWS()
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
@@ -93,7 +95,7 @@ async def start_receiving(update: Update, context: CallbackContext):
 
 
 async def _start_receiving(context: CallbackContext, chat_id: int, username: str):
-    save_to_database(chat_id, username.lower())
+    aws.save_to_database(chat_id, username.lower())
     await context.bot.send_message(chat_id=chat_id,
                                    text=get_text('registered', context))
 
@@ -151,7 +153,7 @@ async def send_live_location(location, update, context: CallbackContext):
 
 async def contact_exchange(update: Update, context: CallbackContext):
     username = update.message.text.strip('@'.lower())
-    chat_id = check_in_database(username)
+    chat_id = aws.check_in_database(username)
     if chat_id:
         context.user_data['chat_id'] = chat_id
         await context.bot.send_message(chat_id=update.effective_chat.id,
